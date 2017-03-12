@@ -17,15 +17,16 @@ class HomeViewController: UIViewController {
         setUpUI()
     }
     
-    fileprivate lazy var pageTitleView:PageTitleView = {
+    fileprivate lazy var pageTitleView:PageTitleView = { [weak self] in
         let titleFrame = CGRect(x: 0, y: kStatusBarH+kNavigationBarH, width: kScreenW, height: kTitleViewH)
         let titles = ["推荐","游戏","娱乐","趣玩"]
         let titleView = PageTitleView(frame:titleFrame,titles:titles)
+        titleView.delegate = self
        // titleView.backgroundColor = UIColor.orange
         return titleView
     }()
     
-    fileprivate lazy var pageContentView:PageContentView = {
+    fileprivate lazy var pageContentView:PageContentView = { [weak self] in
         let contentFrame = CGRect(x: 0, y: kStatusBarH+kNavigationBarH+kTitleViewH, width: kScreenW, height: kScreenH-kStatusBarH-kNavigationBarH-kTitleViewH)
         var childs = [UIViewController]()
         for _ in 0..<4 {
@@ -35,7 +36,7 @@ class HomeViewController: UIViewController {
         }
         
         let contentView = PageContentView(frame:contentFrame ,childVCS:childs,paratents:self)
-        
+        contentView.delegate = self
          return contentView
     }()
 }
@@ -58,5 +59,17 @@ extension HomeViewController {
         let qrcodeItem = UIBarButtonItem(imageName: "Image_scan", highImageName: "Image_scan_click", size: size)
         
         navigationItem.rightBarButtonItems = [historyItem,searchItem,qrcodeItem]
+    }
+}
+
+extension HomeViewController:PageContentViewDelegate {
+    func pageContentOffset(pageContent: PageContentView, progress: CGFloat, sourceIndex: Int, targetIndex: Int) {
+        pageTitleView.setPageOffset(progress:progress,sourceIndex:sourceIndex,targetIndex:targetIndex)
+    }
+}
+
+extension HomeViewController:PageTitleViewDelegate {
+    func returnValue(_ pageTitleView: PageTitleView, selectIndex index: Int) {
+        pageContentView.setScrollOffset(index: index)
     }
 }
